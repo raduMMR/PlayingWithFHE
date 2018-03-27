@@ -27,11 +27,12 @@ int main(int argc, char **argv) {
 	cout<<"Terminat setup\n";
 
 	cout<<"Criptare numere ...\n";
-	LweSample* ca = new_gate_bootstrapping_ciphertext(params);
+	LweSample* ca = new_gate_bootstrapping_ciphertext_array(N, params);
 	for (int i=0; i<N; i++) {
+	// cout<<i<<" "<<((plaintext1>>i)&1)<<" ";
         bootsSymEncrypt(&ca[i], (plaintext1>>i)&1, key);
     }
-	LweSample* cb = new_gate_bootstrapping_ciphertext(params);
+	LweSample* cb = new_gate_bootstrapping_ciphertext_array(N, params);
 	for (int i=0; i<N; i++) {
         bootsSymEncrypt(&cb[i], (plaintext2>>i)&1, key);
     }
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
 	int16_t int_answer = 0;
     for (int i=0; i<16; i++) {
         int ai = bootsSymDecrypt(&result[i], key);
-        int_answer |= (ai<<(16-i);
+        int_answer |= (ai<<(16-i));
     }
 	cout<<"Produsul este "<<int_answer<<endl;
 
@@ -100,9 +101,6 @@ int main(int argc, char **argv) {
 	delete_gate_bootstrapping_ciphertext_array(2*N, result);
 	delete_gate_bootstrapping_secret_keyset(key);
 	delete_gate_bootstrapping_parameters(params);
-	delete_gate_bootstrapping_ciphertext(ctxt1);
-	delete_gate_bootstrapping_ciphertext(ctxt2);
-	delete_gate_bootstrapping_ciphertext(product);
-	delete_gate_bootstrapping_ciphertext(enc1);
-	delete_gate_bootstrapping_ciphertext(enc2);
+	delete_gate_bootstrapping_ciphertext_array(N, ca);
+	delete_gate_bootstrapping_ciphertext_array(N, cb);
 }
