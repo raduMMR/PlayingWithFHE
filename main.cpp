@@ -1,5 +1,5 @@
 #include <iostream>
-// #include <tfhe/tfhe.h>
+#include <tfhe/tfhe.h>
 #include <tfhe/tfhe_io.h>
 #include <ctime>
 #include "TFHE_INT.h"
