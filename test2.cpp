@@ -38,18 +38,18 @@ if(argc != 3)
 	cout<<"Terminat de criptat numere.\n";
 
 	cout<<"Inmultire numere ...\n";
-	LweSample* result = new_gate_bootstrapping_ciphertext_array(N*2, params);
-    LweSample* nr1 = new_gate_bootstrapping_ciphertext_array(N*2, params);
-    LweSample* nr2 = new_gate_bootstrapping_ciphertext_array(N*2, params);
+	LweSample* result = new_gate_bootstrapping_ciphertext_array(N, params);
+    LweSample* nr1 = new_gate_bootstrapping_ciphertext_array(N, params);
+    LweSample* nr2 = new_gate_bootstrapping_ciphertext_array(N, params);
 	clock_t begin = clock();
-    for(int i=0; i<N; i++){
+    /*for(int i=0; i<N; i++){
         bootsCOPY(&nr1[i], &ca[0], &key->cloud);
         bootsCOPY(&nr2[i], &cb[0], &key->cloud);
         bootsCONSTANT(&result[i], 0, &key->cloud);
-    }
-    for(int i=N; i<2*N; i++){
-        bootsCOPY(&nr1[i], &ca[i-N], &key->cloud);
-        bootsCOPY(&nr2[i], &cb[i-N], &key->cloud);
+    }*/
+    for(int i=0; i<N; i++){
+        bootsCOPY(&nr1[i], &ca[i], &key->cloud);
+        bootsCOPY(&nr2[i], &cb[i], &key->cloud);
         bootsCONSTANT(&result[i], 0, &key->cloud);
     }
 
@@ -60,20 +60,20 @@ if(argc != 3)
     LweSample* aux = new_gate_bootstrapping_ciphertext(params);
     LweSample* prev = new_gate_bootstrapping_ciphertext(params);
 
-    for(int i=0; i<2*N; i++){
+    for(int i=0; i<N; i++){
 	    bootsCONSTANT(carry, 0, &key->cloud);
 
-        for(int j=0; j<2*N-pas; j++){
-            bootsCOPY(prev, &result[2*N-1-j-pas], &key->cloud);
+        for(int j=0; j<N-pas; j++){
+            bootsCOPY(prev, &result[N-1-j-pas], &key->cloud);
 
-            bootsAND(bit_product, &nr1[2*N-1-i], &nr2[2*N-1-j], &key->cloud);
+            bootsAND(bit_product, &nr1[N-1-i], &nr2[N-1-j], &key->cloud);
 	   //  cout<<"bit="<<bootsSymDecrypt(bit_product, key)<<endl;
 	/*if(i==2){
 		cout<<"bit="<<bootsSymDecrypt(bit_product, key)<<endl;
 		cout<<"result["<<(2*N-1-j-pas)<<"] = "<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
 	}*/
             bootsXOR(aux, carry, bit_product, &key->cloud);
-            bootsXOR(&result[2*N-1-j-pas], aux, &result[2*N-1-j-pas], &key->cloud);
+            bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);
 
 	/*if(i==2){
 		cout<<"result="<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
@@ -98,10 +98,10 @@ if(argc != 3)
 	cout<<"Terminat de inmultit numerele.\n";
 
 	// int16_t int_answer = bootsSymDecrypt(&result[0], key)*(int)pow(2, 2*N-1);
-	int16_t int_answer = 0;
-   for (int i=0; i<2*N; i++) {
+	int8_t int_answer = 0;
+   for (int i=0; i<N; i++) {
         int ai = bootsSymDecrypt(&result[i], key);
-        int_answer |= (ai<<(2*N-1-i));
+        int_answer |= (ai<<(N-1-i));
 	cout<<ai;
     }
    cout<<endl;
@@ -110,21 +110,21 @@ if(argc != 3)
 		int_answer += bootsSymDecrypt(&result[i], key)*(int)pow(2, 2*N-1-i); 
 	}*/
 
-	cout<<"Produsul este "<<int_answer<<endl;
+	cout<<"Produsul este "<<(int)int_answer<<endl;
 
-FILE* cloud_data = fopen("cloud.data","wb");
-    for (int i=0; i<N; i++)
-        export_gate_bootstrapping_ciphertext_toFile(cloud_data, &ca[i], params);
-fclose(cloud_data);
+//FILE* cloud_data = fopen("cloud.data","wb");
+    // for (int i=0; i<N; i++)
+      //  export_gate_bootstrapping_ciphertext_toFile(cloud_data, &ca[0], params);
+// fclose(cloud_data);
 
 
     delete_gate_bootstrapping_ciphertext(bit_product);
     delete_gate_bootstrapping_ciphertext(carry);
     delete_gate_bootstrapping_ciphertext(aux);
     delete_gate_bootstrapping_ciphertext(prev);
-    delete_gate_bootstrapping_ciphertext_array(2*N, nr1);
-    delete_gate_bootstrapping_ciphertext_array(2*N, nr2);
-	delete_gate_bootstrapping_ciphertext_array(2*N, result);
+    delete_gate_bootstrapping_ciphertext_array(N, nr1);
+    delete_gate_bootstrapping_ciphertext_array(N, nr2);
+	delete_gate_bootstrapping_ciphertext_array(N, result);
 	delete_gate_bootstrapping_secret_keyset(key);
 	delete_gate_bootstrapping_parameters(params);
 	delete_gate_bootstrapping_ciphertext_array(N, ca);
