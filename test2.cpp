@@ -5,7 +5,7 @@
 #include <ctime>
 using namespace std;
 
-#define N 8
+#define N 16
 
 int main(int argc, char **argv) {
 
@@ -14,8 +14,8 @@ if(argc != 3)
         cout<<"Nr de parametri incorect.\n";
         return -1;
     }
-    int8_t plaintext1 = atoi(argv[1]);
-    int8_t plaintext2 = atoi(argv[2]);
+    int16_t plaintext1 = atoi(argv[1]);
+    int16_t plaintext2 = atoi(argv[2]);
 
     cout<<"Sa batem HElib-ul !!!!"<<endl;
 	cout<<"Generare parametri si chei ..."<<endl;
@@ -98,7 +98,7 @@ if(argc != 3)
 	cout<<"Terminat de inmultit numerele.\n";
 
 	// int16_t int_answer = bootsSymDecrypt(&result[0], key)*(int)pow(2, 2*N-1);
-	int16_t int_answer = 0;
+	int int_answer = 0;
    for (int i=0; i<2*N; i++) {
         int ai = bootsSymDecrypt(&result[i], key);
         int_answer |= (ai<<(2*N-1-i));
