@@ -5,11 +5,11 @@ using namespace std;
 
 LweSample* TFHE_INT_8::encrypt_int(const int number, const TFheGateBootstrappingSecretKeySet* sk)
 {
-    LweSample* enc_int = new_gate_bootstrapping_ciphertext_array(N, sk->params);
+	LweSample* enc_int = new_gate_bootstrapping_ciphertext_array(8, sk->params);
 	for (int i=0; i<8; i++) {
 		bootsSymEncrypt(&enc_int[i], (number>>(7-i))&1, sk);
    	}
-    return enc_int;
+	return enc_int;
 }
 
 int TFHE_INT_8::decrypt_int(const LweSample* enc_int, const TFheGateBootstrappingSecretKeySet* sk)
@@ -22,10 +22,9 @@ int TFHE_INT_8::decrypt_int(const LweSample* enc_int, const TFheGateBootstrappin
     return int_answer;
 }
 
-LweSample* TFHE_INT_8::add(const LweSample* nr1, const LweSample* nr2, 
+void TFHE_INT_8::add(LweSample* sum, const LweSample* nr1, const LweSample* nr2, 
     const TFheGateBootstrappingCloudKeySet* ck)
 {
-    LweSample* sum = new_gate_bootstrapping_ciphertext_array(N, ck->params);
     LweSample* aux = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* carry = new_gate_bootstrapping_ciphertext(ck->params);
     bootsCONSTANT(carry, 0, ck);
@@ -44,28 +43,33 @@ LweSample* TFHE_INT_8::add(const LweSample* nr1, const LweSample* nr2,
 
     delete_gate_bootstrapping_ciphertext(carry);
     delete_gate_bootstrapping_ciphertext(aux);
-
-    return sum;
 }
 
-LweSample* TFHE_INT_8::multiply(const LweSample* ca, const LweSample* cb, 
-    const TFheGateBootstrappingCloudKeySet* ck)
+void TFHE_INT_8::multiply(LweSample* result, const LweSample* ca, const LweSample* cb, 
+    const TFheGateBootstrappingCloudKeySet* ck, const TFheGateBootstrappingSecretKeySet *sk)
 {
-    LweSample* result = new_gate_bootstrapping_ciphertext_array(8, ck->params);
+for(int i=0; i<8; i++){
+cout<<bootsSymDecrypt(&ca[i], sk);
+}
+cout<<endl;
+for(int i=0; i<8; i++){
+cout<<bootsSymDecrypt(&cb[i], sk);
+}
+cout<<endl;
+
     LweSample* bit_product = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* carry = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* aux = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* prev = new_gate_bootstrapping_ciphertext(ck->params);
     int pas=0;
-
     for(int i=0; i<8; i++){
-	    bootsCONSTANT(carry, 0, ck);
+	bootsCONSTANT(carry, 0, ck);
 
         for(int j=0; j<8-pas; j++){
-            bootsCOPY(prev, &result[15-j-pas], ck);
-            bootsAND(bit_product, &ca[15-i], &cb[15-j], ck);
+            bootsCOPY(prev, &result[7-j-pas], ck);
+            bootsAND(bit_product, &ca[7-i], &cb[7-j], ck);
             bootsXOR(aux, carry, bit_product, ck);
-            bootsXOR(&result[15-j-pas], aux, &result[15-j-pas], ck);
+            bootsXOR(&result[7-j-pas], aux, &result[7-j-pas], ck);
             bootsAND(aux, bit_product, carry, ck);
             bootsAND(bit_product, bit_product, prev, ck);
             bootsOR(aux, aux, bit_product, ck);
@@ -74,12 +78,14 @@ LweSample* TFHE_INT_8::multiply(const LweSample* ca, const LweSample* cb,
         }
         pas++;
     }
-
     delete_gate_bootstrapping_ciphertext(bit_product);
     delete_gate_bootstrapping_ciphertext(carry);
     delete_gate_bootstrapping_ciphertext(aux);
     delete_gate_bootstrapping_ciphertext(prev);
 
-    return result;
+for(int i=0; i<8; i++){
+cout<<bootsSymDecrypt(&result[i], sk);
+}
+cout<<endl;
 }
 

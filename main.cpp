@@ -24,9 +24,9 @@ int main(int argc, char **argv) {
 	TFheGateBootstrappingSecretKeySet* key = new_random_gate_bootstrapping_secret_keyset(params);
 	cout<<"Terminat setup\n";
 
-    LweSample* ca = NULL;
-    LweSample* cb = NULL;
-    LweSample* product = NULL;
+    LweSample* ca = new_gate_bootstrapping_ciphertext_array(8, params);;
+    LweSample* cb = new_gate_bootstrapping_ciphertext_array(8, params);;
+    LweSample* product = new_gate_bootstrapping_ciphertext_array(8, params);;
 
     cout<<"Criptare numere...\n";
     ca = TFHE_INT_8::encrypt_int( plaintext1, key);
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     cout<<"Terminat de criptat numere.\n";
 
     cout<<"Inmultire numere...\n";
-    product = TFHE_INT_8::multiply(ca, cb, &key->cloud);
+    TFHE_INT_8::multiply(product, ca, cb, &key->cloud, key);
     cout<<"Terminat de inmultit numerele.\n";
 
     int result = TFHE_INT_8::decrypt_int(product, key);

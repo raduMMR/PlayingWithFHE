@@ -14,10 +14,8 @@ public:
 
     static int decrypt_int(const LweSample* enc_int, const TFheGateBootstrappingSecretKeySet* sk);
 
-    // static int decrypt_int16(const LweSample* enc_int, const TFheGateBootstrappingSecretKeySet* sk);
+    static void add(LweSample* result, const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck);
 
-    static LweSample* add(const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck);
-
-    static LweSample* multiply(const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck);
+    static void  multiply(LweSample* result, const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck, const TFheGateBootstrappingSecretKeySet *sk);
 
 };
