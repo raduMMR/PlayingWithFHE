@@ -5,7 +5,7 @@
 #include <ctime>
 using namespace std;
 
-#define N 16
+#define N 8
 
 int main(int argc, char **argv) {
 
@@ -14,8 +14,8 @@ if(argc != 3)
         cout<<"Nr de parametri incorect.\n";
         return -1;
     }
-    int16_t plaintext1 = atoi(argv[1]);
-    int16_t plaintext2 = atoi(argv[2]);
+    int8_t plaintext1 = atoi(argv[1]);
+    int8_t plaintext2 = atoi(argv[2]);
 
     cout<<"Sa batem HElib-ul !!!!"<<endl;
 	cout<<"Generare parametri si chei ..."<<endl;
@@ -98,7 +98,7 @@ if(argc != 3)
 	cout<<"Terminat de inmultit numerele.\n";
 
 	// int16_t int_answer = bootsSymDecrypt(&result[0], key)*(int)pow(2, 2*N-1);
-	int int_answer = 0;
+	int16_t int_answer = 0;
    for (int i=0; i<2*N; i++) {
         int ai = bootsSymDecrypt(&result[i], key);
         int_answer |= (ai<<(2*N-1-i));
@@ -111,6 +111,12 @@ if(argc != 3)
 	}*/
 
 	cout<<"Produsul este "<<int_answer<<endl;
+
+FILE* cloud_data = fopen("cloud.data","wb");
+    for (int i=0; i<N; i++)
+        export_gate_bootstrapping_ciphertext_toFile(cloud_data, &ca[i], params);
+fclose(cloud_data);
+
 
     delete_gate_bootstrapping_ciphertext(bit_product);
     delete_gate_bootstrapping_ciphertext(carry);
