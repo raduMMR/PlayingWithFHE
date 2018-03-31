@@ -19,7 +19,7 @@ if(argc != 3)
 
     cout<<"Sa batem HElib-ul !!!!"<<endl;
 	cout<<"Generare parametri si chei ..."<<endl;
-	const int minimum_lambda  = 110;
+	const int minimum_lambda  = 80;
 	TFheGateBootstrappingParameterSet* params = new_default_gate_bootstrapping_parameters(minimum_lambda);
 	uint32_t seed[] = {314, 1592, 657};
 	tfhe_random_generator_setSeed(seed, 3);
