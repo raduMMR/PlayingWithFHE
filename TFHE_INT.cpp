@@ -46,16 +46,35 @@ void TFHE_INT_8::add(LweSample* sum, const LweSample* nr1, const LweSample* nr2,
 }
 
 void TFHE_INT_8::multiply(LweSample* result, const LweSample* ca, const LweSample* cb, 
-    const TFheGateBootstrappingCloudKeySet* ck, const TFheGateBootstrappingSecretKeySet *sk)
+    const TFheGateBootstrappingCloudKeySet* ck1, const TFheGateBootstrappingSecretKeySet *sk)
 {
-for(int i=0; i<8; i++){
+/*for(int i=0; i<8; i++){
 cout<<bootsSymDecrypt(&ca[i], sk);
 }
 cout<<endl;
 for(int i=0; i<8; i++){
 cout<<bootsSymDecrypt(&cb[i], sk);
 }
-cout<<endl;
+cout<<endl;*/
+FILE* cloud_key = fopen("cloud.key","rb");
+    TFheGateBootstrappingCloudKeySet* ck = new_tfheGateBootstrappingCloudKeySet_fromFile(cloud_key);
+    fclose(cloud_key);
+
+/*LweSample* bit1 = new_gate_bootstrapping_ciphertext(ck->params);
+LweSample* bit2 = new_gate_bootstrapping_ciphertext(ck->params);
+for(int i=0; i<100; i++){
+	int8_t ptxt1 = rand()%2;
+	int8_t ptxt2 = rand()%2;
+	bootsSymEncrypt(bit1, ptxt1, sk);
+	bootsSymEncrypt(bit2, ptxt2, sk);
+	bootsXOR(bit1, bit1, bit2, ck);
+	if( (ptxt1+ptxt2)%2 != bootsSymDecrypt(bit1, sk)){
+		cout<<(int)ptxt1<<" xor "<<(int)ptxt2<<" = "<<bootsSymDecrypt(bit1, sk)<<endl;
+	}
+}
+delete_gate_bootstrapping_ciphertext(bit1);
+delete_gate_bootstrapping_ciphertext(bit2);
+return;*/
 
     LweSample* bit_product = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* carry = new_gate_bootstrapping_ciphertext(ck->params);
@@ -69,7 +88,11 @@ cout<<endl;
             bootsCOPY(prev, &result[7-j-pas], ck);
             bootsAND(bit_product, &ca[7-i], &cb[7-j], ck);
             bootsXOR(aux, carry, bit_product, ck);
-            bootsXOR(&result[7-j-pas], aux, &result[7-j-pas], ck);
+
+	    cout<<bootsSymDecrypt(aux, sk)<<"xor"<<bootsSymDecrypt(prev, sk)<<"=";
+            bootsXOR(&result[7-j-pas], aux, prev, ck);
+	    cout<<bootsSymDecrypt(&result[7-j-pas], sk)<<endl;
+
             bootsAND(aux, bit_product, carry, ck);
             bootsAND(bit_product, bit_product, prev, ck);
             bootsOR(aux, aux, bit_product, ck);
@@ -83,9 +106,7 @@ cout<<endl;
     delete_gate_bootstrapping_ciphertext(aux);
     delete_gate_bootstrapping_ciphertext(prev);
 
-for(int i=0; i<8; i++){
-cout<<bootsSymDecrypt(&result[i], sk);
-}
-cout<<endl;
+ delete_gate_bootstrapping_cloud_keyset(ck);
+
 }
 
