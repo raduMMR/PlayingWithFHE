@@ -65,30 +65,15 @@ if(argc != 3)
 
         for(int j=0; j<N-pas; j++){
             bootsCOPY(prev, &result[N-1-j-pas], &key->cloud);
-
             bootsAND(bit_product, &nr1[N-1-i], &nr2[N-1-j], &key->cloud);
-	   //  cout<<"bit="<<bootsSymDecrypt(bit_product, key)<<endl;
-	/*if(i==2){
-		cout<<"bit="<<bootsSymDecrypt(bit_product, key)<<endl;
-		cout<<"result["<<(2*N-1-j-pas)<<"] = "<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
-	}*/
             bootsXOR(aux, carry, bit_product, &key->cloud);
-            bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);
-
-	/*if(i==2){
-		cout<<"result="<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
-	}*/	
+            bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);	
             bootsAND(aux, bit_product, carry, &key->cloud);
             bootsAND(bit_product, bit_product, prev, &key->cloud);
             bootsOR(aux, aux, bit_product, &key->cloud);
             bootsAND(carry, carry, prev, &key->cloud);
             bootsOR(carry, aux, carry, &key->cloud);
-
         }
-	/*for(int j=0; j<2*N; j++){
-	    cout<<bootsSymDecrypt(&result[j], key);
-	}
-	cout<<endl;*/
         pas++;
     }
 	clock_t end = clock();
