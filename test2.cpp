@@ -67,7 +67,16 @@ if(argc != 3)
             bootsCOPY(prev, &result[N-1-j-pas], &key->cloud);
             bootsAND(bit_product, &nr1[N-1-i], &nr2[N-1-j], &key->cloud);
             bootsXOR(aux, carry, bit_product, &key->cloud);
+<<<<<<< HEAD
             bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);	
+=======
+cout<<bootsSymDecrypt(aux, key)<<" xor "<<bootsSymDecrypt(&result[N-1-j-pas], key)<<"=";
+            bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);
+ cout<<bootsSymDecrypt(&result[N-1-j-pas], key)<<endl;
+	/*if(i==2){
+		cout<<"result="<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
+	}*/	
+>>>>>>> 41ec87b2bbd20a1ed8051d46396e98d57ceca202
             bootsAND(aux, bit_product, carry, &key->cloud);
             bootsAND(bit_product, bit_product, prev, &key->cloud);
             bootsOR(aux, aux, bit_product, &key->cloud);
