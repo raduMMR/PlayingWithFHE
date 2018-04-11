@@ -45,7 +45,7 @@ void TFHE_INT_8::add(LweSample* sum, const LweSample* nr1, const LweSample* nr2,
     delete_gate_bootstrapping_ciphertext(aux);
 }
 
-void TFHE_INT_8::multiply(LweSample* result, const LweSample* ca, const LweSample* cb, 
+LweSample* TFHE_INT_8::multiply(const LweSample* ca, const LweSample* cb, 
     const TFheGateBootstrappingCloudKeySet* ck1, const TFheGateBootstrappingSecretKeySet *sk)
 {
 /*for(int i=0; i<8; i++){
@@ -62,7 +62,7 @@ FILE* cloud_key = fopen("cloud.key","rb");
 
 /*LweSample* bit1 = new_gate_bootstrapping_ciphertext(ck->params);
 LweSample* bit2 = new_gate_bootstrapping_ciphertext(ck->params);
-for(int i=0; i<100; i++){
+for(int i=0; i<10; i++){
 	int8_t ptxt1 = rand()%2;
 	int8_t ptxt2 = rand()%2;
 	bootsSymEncrypt(bit1, ptxt1, sk);
@@ -76,6 +76,7 @@ delete_gate_bootstrapping_ciphertext(bit1);
 delete_gate_bootstrapping_ciphertext(bit2);
 return;*/
 
+LweSample* result = new_gate_bootstrapping_ciphertext_array(8, ck->params);
     LweSample* bit_product = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* carry = new_gate_bootstrapping_ciphertext(ck->params);
     LweSample* aux = new_gate_bootstrapping_ciphertext(ck->params);
@@ -89,10 +90,15 @@ return;*/
             bootsAND(bit_product, &ca[7-i], &cb[7-j], ck);
             bootsXOR(aux, carry, bit_product, ck);
 
-	    cout<<bootsSymDecrypt(aux, sk)<<"xor"<<bootsSymDecrypt(prev, sk)<<"=";
-            bootsXOR(&result[7-j-pas], aux, prev, ck);
-	    cout<<bootsSymDecrypt(&result[7-j-pas], sk)<<endl;
+	// int unu = rand()%2;
+	// int doi = rand()%2;
+	// bootsSymEncrypt(aux, unu, sk); bootsSymEncrypt(prev, doi, sk);
+	bootsXOR(&result[7-j-pas], aux, prev, ck);
 
+            // bootsXOR(&result[7-j-pas], aux, prev, ck);
+if((bootsSymDecrypt(aux, sk) + bootsSymDecrypt(prev, sk)) %2 != bootsSymDecrypt(&result[7-j-pas], sk)){
+	cout<<"Eroare\n";
+}
             bootsAND(aux, bit_product, carry, ck);
             bootsAND(bit_product, bit_product, prev, ck);
             bootsOR(aux, aux, bit_product, ck);
@@ -105,8 +111,8 @@ return;*/
     delete_gate_bootstrapping_ciphertext(carry);
     delete_gate_bootstrapping_ciphertext(aux);
     delete_gate_bootstrapping_ciphertext(prev);
-
- delete_gate_bootstrapping_cloud_keyset(ck);
-
+    // delete_gate_bootstrapping_ciphertext_array(8, result);
+    delete_gate_bootstrapping_cloud_keyset(ck);
+return result;
 }
 

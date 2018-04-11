@@ -31,7 +31,7 @@ FILE* cloud_key = fopen("cloud.key","wb");
 
     LweSample* ca = new_gate_bootstrapping_ciphertext_array(8, params);;
     LweSample* cb = new_gate_bootstrapping_ciphertext_array(8, params);;
-    LweSample* product = new_gate_bootstrapping_ciphertext_array(8, params);;
+    LweSample* product = NULL; //new_gate_bootstrapping_ciphertext_array(8, params);;
 
     cout<<"Criptare numere...\n";
     ca = TFHE_INT_8::encrypt_int( plaintext1, key);
@@ -54,12 +54,13 @@ delete_gate_bootstrapping_ciphertext(bit1);
 delete_gate_bootstrapping_ciphertext(bit2);*/
 
     cout<<"Inmultire numere...\n";
-    TFHE_INT_8::multiply(product, ca, cb, &key->cloud, key);
+   product =  TFHE_INT_8::multiply(ca, cb, &key->cloud, key);
     cout<<"Terminat de inmultit numerele.\n";
 
     int result = TFHE_INT_8::decrypt_int(product, key);
     cout<<"Rezultatul inmultirii = "<<result<<endl;
 
+if(product != NULL)
 	delete_gate_bootstrapping_ciphertext_array(8, product);
 	delete_gate_bootstrapping_secret_keyset(key);
 	delete_gate_bootstrapping_parameters(params);

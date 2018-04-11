@@ -16,6 +16,6 @@ public:
 
     static void add(LweSample* result, const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck);
 
-    static void  multiply(LweSample* result, const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck, const TFheGateBootstrappingSecretKeySet *sk);
+    static LweSample* multiply(const LweSample* nr1, const LweSample* nr2, const TFheGateBootstrappingCloudKeySet* ck, const TFheGateBootstrappingSecretKeySet *sk);
 
 };

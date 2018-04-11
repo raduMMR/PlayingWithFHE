@@ -73,8 +73,9 @@ if(argc != 3)
 		cout<<"result["<<(2*N-1-j-pas)<<"] = "<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
 	}*/
             bootsXOR(aux, carry, bit_product, &key->cloud);
+cout<<bootsSymDecrypt(aux, key)<<" xor "<<bootsSymDecrypt(&result[N-1-j-pas], key)<<"=";
             bootsXOR(&result[N-1-j-pas], aux, &result[N-1-j-pas], &key->cloud);
-
+ cout<<bootsSymDecrypt(&result[N-1-j-pas], key)<<endl;
 	/*if(i==2){
 		cout<<"result="<<bootsSymDecrypt(&result[2*N-1-j-pas], key)<<endl;
 	}*/	
