@@ -6,6 +6,7 @@
 #include "timing.h"
 #include "EncryptedArray.h"
 #include <NTL/lzz_pXFactoring.h>
+#include <assert.h>
 
 using namespace std;
 
@@ -25,6 +26,13 @@ vector<Ctxt*> encryptIntVal (const int val, int t_bits);
 int decryptBitVal (const Ctxt *ct);
 int decryptIntVal(const vector<Ctxt*> enc_bits);
 
+/******************* batching encryption and decryption *****************************/
+Ctxt* batch_encryptBitVal (const vector<long> bit);
+vector<Ctxt*> batch_encryptIntVal (const vector<int> val, int t_bits);
+vector<long> batch_decryptBitVal (const Ctxt *ct);
+vector<int> batch_decryptIntVal(const vector<Ctxt*> enc_bits);
+/*************************************************************************************/
+
 Ctxt* compute_z (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
 Ctxt* compute_t (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
 
@@ -33,6 +41,22 @@ Ctxt* compute_t (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
  * @return Enc(0), otherwise 
 */
 Ctxt* compute_s (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
+
+vector<Ctxt*> computeLBPCode(vector<Ctxt*> &pixels, vector<vector<Ctxt*>> &neighbours);
+
+void test_LBPComputation(){
+    vector<int> pixeli(256);
+    vector<int> vecini(8);
+
+    for(int i=0; i<256; i++) {
+        pixeli[i] = rand() % 256;
+    }
+
+    for(int i=0; i<8; i++) {
+        vecini[i] = rand() % 256;
+    }
+    
+}
 
 void test_comparison(int t){
     int X = 1630, Y = 911;
@@ -83,7 +107,7 @@ void test_comparison(int t){
     }
 }
 
-void testEncDec(int t_bits){
+void test_EncDec(int t_bits){
     vector<Ctxt*> enc_bits;
 
     for(int i=0; i<10; i++){
@@ -166,12 +190,14 @@ void context_setup(){
     ea = new EncryptedArray(*context, G);
 }
 
+/*************************************************************************************/
 void cleanup_context(){
     delete context;
     delete secretKey;
     delete ea;
 }
 
+/*************************************************************************************/
 Ctxt* encryptBitVal (const int bit){
     long nslots = ea->size();
     // cout<<"Numar de sloturi="<<nslots<<endl;
@@ -191,6 +217,7 @@ Ctxt* encryptBitVal (const int bit){
     return ctxt_x;
 }
 
+/*************************************************************************************/
 int decryptBitVal (const Ctxt *ct){
     vector<long> decrypted;
     ea->decrypt(*ct, *secretKey, decrypted);
@@ -200,6 +227,7 @@ int decryptBitVal (const Ctxt *ct){
     return decrypted[0];
 }
 
+/*************************************************************************************/
 vector<Ctxt*> encryptIntVal (const int val, int t_bits){
     vector<Ctxt*> enc_val(t_bits);
 
@@ -212,6 +240,7 @@ vector<Ctxt*> encryptIntVal (const int val, int t_bits){
     return enc_val;
 }
 
+/*************************************************************************************/
 int decryptIntVal(const vector<Ctxt*> enc_bits) {
     int val = 0;
 
@@ -304,4 +333,69 @@ Ctxt* compute_s (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y)
 	delete ct_z;
 	delete ct_s;	
 	return ret;	
+}
+
+/*************************************************************************************/
+vector<Ctxt*> computeLBPCode(vector<Ctxt*> &pixels, vector<vector<Ctxt*>> &neighbours){
+    assert(neighbours.size() == 8);
+
+    vector<Ctxt*> lbpcodes(8);
+
+    // for each neighbour compute a bit of the final LBP code.
+    for(int i=0; i<8; i++) {
+        // compute the result of the operation neighbour >= pixel
+        // using their binary representation, pixel = [0, 255].
+        lbpcodes[i] = compute_s(0, 7, pixels, neighbours[i]);
+    }
+
+    return lbpcodes;
+}
+
+/*************************************************************************************/
+Ctxt* batch_encryptBitVal (const vector<long> bit){
+    // long nslots = ea->size();
+    // cout<<"Numar de sloturi="<<nslots<<endl;
+
+    const FHEPubKey& publicKey = *secretKey;
+    Ctxt *ctxt_x = new Ctxt(publicKey);
+    ea->encrypt(*ctxt_x, publicKey, bit);
+
+    return ctxt_x;
+}
+
+/*************************************************************************************/
+vector<long> batch_decryptBitVal (const Ctxt *ct){
+    vector<long> decrypted;
+    ea->decrypt(*ct, *secretKey, decrypted);
+    return decrypted;
+}
+
+/*************************************************************************************/
+vector<Ctxt*> batch_encryptIntVal (const vector<int> val, int t_bits){
+    vector<Ctxt*> enc_val(t_bits);
+
+    for(int i=0; i<t_bits; i++) {
+        vector<long> bit_i(ea->size());
+        for(int j=0; j<bit_i.size(); j++){
+            bit_i[j] = (val[j] >> i) & 1;
+        }
+        enc_val[i] = batch_encryptBitVal(bit_i);
+    }
+
+    return enc_val;
+}
+
+/*************************************************************************************/
+vector<int> batch_decryptIntVal(const vector<Ctxt*> enc_bits) {
+    vector<int> val(ea->size(), 0);
+
+    for(int i=0; i<enc_bits.size(); i++){
+        vector<long> tmp = batch_decryptBitVal(enc_bits[i]);
+
+        for(int j=0; j<tmp.size(); j++){
+            val[j] |= tmp[j] << i; 
+        }
+    }
+
+    return val;
 }
