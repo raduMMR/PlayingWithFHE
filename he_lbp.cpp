@@ -31,6 +31,79 @@ Ctxt* compute_z (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
 Ctxt* compute_t (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
 Ctxt* compute_s (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y);
 
+
+vector<Ctxt*> hom_LBP(vector<Ctxt*> enc_pixeli, vector<vector<Ctxt*>> vecini, int t_bits);
+
+void test_LBP() {
+    assert(NSLOTS != 0);
+
+    int t_bits=8;
+
+    vector<long> pixeli;
+    for(int i=0; i<NSLOTS; i++) {
+        pixeli.push_back(rand() % 256);
+    }
+
+    vector<vector<long>> vecini(t_bits);
+    for(int i=0; i<t_bits; i++) {
+        for(int j=0; j<NSLOTS; j++) {
+            // toti vecinii de pe pozitia i ai pixelilor.
+            vecini[i].push_back(rand() % 256);
+        }
+    }
+
+    vector<long> lbp_codes(NSLOTS);
+    for(int i=0; i<NSLOTS; i++) {
+        lbp_codes[i] = 0;
+        for(int j=0; j<t_bits; j++) {
+            lbp_codes[i] |= (vecini[j][i] >= pixeli[i]) << j;
+        }
+    }
+
+    // encrypting pixels.
+    cout << "Encrypting pixels ...\n";
+    vector<vector<Ctxt*> > enc_vecini(t_bits);
+    for(int i=0; i<t_bits; i++) {
+        enc_vecini[i] = encryptIntVal(vecini[i], t_bits);
+    }
+    vector<Ctxt*> enc_pixeli = encryptIntVal(pixeli, t_bits);
+    cout << "Done pixels encryption.\n";
+
+    // computing LBP codes.
+    cout << "Homomorphic LBP computation ...\n";
+    vector<Ctxt*> hom_lbp = hom_LBP(enc_pixeli, enc_vecini, t_bits);
+    cout << "Done LBP computation.\n";
+
+    // comparison.
+    bool success = true;
+    vector<long> dec_lbp = decryptIntVal(hom_lbp);
+    for(int i=0; i<dec_lbp.size(); i++) {
+        if(dec_lbp[i] != lbp_codes[i]) {
+            cout << "ESEC\n";
+            success = false;
+            break;
+        }
+    }
+    if( success == true) {
+        cout << "Succes!!!!!!!!\n";
+    }
+
+    // cleaning up.
+    cout << "Cleaning up ctxts...\n";
+    for(int i=0; i<t_bits; i++) {
+        for(int j=0; j<t_bits; j++) {
+            delete enc_vecini[i][j];
+        }
+    }
+
+    for(int i=0; i<t_bits; i++) {
+        delete enc_pixeli[i];
+    }
+    cout << "Done cleaning up ctxts.\n";
+
+}
+
+
 // void test_EncDec() {
 //     int t_bits = 8;
 //     vector<Ctxt*> vec_ctxt;
@@ -182,7 +255,8 @@ int main(int argc, char **argv) {
     setGlobalVariables(p, r, d, c, k, w, L, m, gens, ords);
     cout << "Terminat de generat context.\n";
 
-    test_Compute_s();
+    // test_Compute_s();
+    test_LBP();
 
     cout << "Cleaning up ...\n";
     cleanGlobalVariables();
@@ -346,6 +420,15 @@ Ctxt* compute_s (int i, int j, vector<Ctxt*>& ct_x, vector<Ctxt*>& ct_y)
 	delete ct_z;
 	delete ct_s;	
 	return ret;	
+}
+
+/*************************************************************************************/
+vector<Ctxt*> hom_LBP(vector<Ctxt*> enc_pixeli, vector<vector<Ctxt*>> vecini, int t_bits) {
+    vector<Ctxt*> lbp_codes;
+    for(int i=0; i<t_bits; i++) {
+        lbp_codes.push_back(compute_s(0, t_bits, vecini[i], enc_pixeli));
+    }
+    return lbp_codes;
 }
 
 /*************************************************************************************/
