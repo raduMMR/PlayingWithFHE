@@ -15,6 +15,10 @@ EncryptedArray *ea;
 static bool noPrint = false;
 int NSLOTS=0;
 
+double clock_diff(const clock_t &t1, const clock_t &t2){
+    return double(t2 - t1) / CLOCKS_PER_SEC;
+}
+
 void setGlobalVariables(long p, long r, long d, long c, long k, long w, 
                long L, long m, const Vec<long>& gens, const Vec<long>& ords);
 
@@ -256,7 +260,11 @@ int main(int argc, char **argv) {
     cout << "Terminat de generat context.\n";
 
     // test_Compute_s();
+    clock_t begin = clock();
     test_LBP();
+    clock_t end = clock();
+
+    cout << "TIMP: " << clock_diff(begin, end) << " secunde.\n";
 
     cout << "Cleaning up ...\n";
     cleanGlobalVariables();
